@@ -1,0 +1,28 @@
+{% extends 'base.html' %}
+
+{% block head %}
+    <title>The W Music Store!!!</title>
+{% endblock %}
+
+{% block body %}
+    <header>
+        <img src="">
+        This is your cart!
+    </header>
+
+    <section>
+        {% if cart %}
+            These are the reference numbers of your products
+            <ul>
+            <!-- Show the list of instruments. -->
+            {% for item in cart %}
+                <li><img src={{item["url"]}} width="50"/>{{item["name"]}} Qty:{{item["count"]}}</li>
+            {% endfor %}
+            </ul>
+        {% else %}
+            <p>Your cart is empty!</p>
+        {% endif %}
+    </section>
+    <br>
+    <a href="/">Go to root</a>
+{% endblock %}

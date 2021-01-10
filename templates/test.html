@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>From Flask</title>
+    <style>
+        header {
+            background: #eee;
+            border-bottom: 1px solid #ccc;
+            padding: 20px;
+            color: #666;
+
+            img {
+                vertical-align: bottom;
+                margin-right: 20px;
+            }
+        }
+
+        section {
+            color: #666;
+            padding: 20px;
+        }
+    </style>
+</head>
+
+<body>
+    <header>
+        <img src="">
+        Welcome to our music store
+    </header>
+
+    <section>
+        {% if cart %}
+           <pre>
+               {{cart}}
+           </pre>
+        {% endif %}
+    </section>
+    <br>
+    <a href="/">Go to root</a>
+</body>
+
+</html>

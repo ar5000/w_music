@@ -1,0 +1,37 @@
+{% extends 'base.html' %}
+
+{% block head %}
+    <title>The W Music Store!!!</title>
+{% endblock %}
+
+{% block body %}
+
+    {% if session['username'] %}
+    <header>
+        <img src="">
+        Welcome to our music store, {{session['username']}}
+        <a href="{{url_for('logout')}}">Log out!</a>
+    </header>
+    {% else %}
+    <header>
+        <img src="">
+        Welcome to our music store, please <a href="{{url_for('login')}}">Log in!</a>
+    </header>
+    {% endif %}
+
+    <section>
+        <h1>Take a look at the instruments in our store</h1>
+
+        <h3></h3>
+        {% if instruments %}
+            <ul>
+            {% for instrument in instruments %}
+            <li><a href="/instruments/show/{{instrument['ref_num']}}"><img src="{{instrument['url']}}" width="150"/></a> {{instrument["name"]}} <a href="cart/add/{{instrument['ref_num']}}">Add to cart!</a></li>
+            {% endfor %}
+            </ul>
+        {% endif %}
+    </section>
+    <br>
+    <a href="/">Go to root</a>
+    <a href="/cart/show/all">Go to cart</a>
+{% endblock %}

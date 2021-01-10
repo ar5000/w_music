@@ -1,0 +1,31 @@
+{% extends 'base.html' %}
+
+{% block head %}
+    <title>The W Music Store!!!</title>
+{% endblock %}
+
+{% block body %}
+    <header>
+        <img src="">
+        Welcome to our music store
+    </header>
+
+    <section>
+        {% if instrument %}
+        <form method="POST">
+            <h1>Are you sure to delete? go back to cancel</h1>
+            <h5>{{instrument["name"]}}</h5>
+            <input type="hidden" id="ref_num" name="ref_num" value="{{instrument['ref_num']}}">
+            <input type="hidden" id="cat" name="cat" value="{{instrument['category']}}">
+            <input type="hidden" id="name" name="name" value="{{instrument['name']}}">
+            <input type="hidden" id="url" name="url" value="{{instrument['url']}}">
+            <input type="submit" value="Yes">
+        </form>
+        {% endif %}
+        {% if res %}
+            <p>{{res}}</p>
+        {% endif %}
+    </section>
+    <br>
+    <a href="/instruments/show/all">Cancel and go to see all instruments</a>
+{% endblock %}

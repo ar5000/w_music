@@ -1,0 +1,26 @@
+{% extends 'base.html' %}
+
+{% block head %}
+    <title>The W Music Store!!!</title>
+{% endblock %}
+
+{% block body %}
+    <header>
+        <img src="">
+        Welcome to our music store
+    </header>
+    {% if instrument %}
+    <section>
+        <h1>This an amazing {{instrument["name"]}}</h1>
+        <h3> Category: {{instrument["category"]}}</h3>
+        <img src="{{instrument['url']}}">
+    </section>
+    {% endif %}
+    {% if instrument["category"] == "string" %}
+    <section>
+    <h1>Here's some inspiration from <a href='{{instrument["songurl"]}}' target="_blank"> Songster</a></h1>
+    </section>
+    {% endif %}    
+    <br>
+    <a href="/">Back to the main page</a>
+{% endblock %}

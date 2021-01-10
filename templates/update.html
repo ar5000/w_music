@@ -1,0 +1,33 @@
+{% extends 'base.html' %}
+
+{% block head %}
+    <title>The W Music Store!!!</title>
+{% endblock %}
+
+{% block body %}
+    <header>
+        <img src="">
+        Welcome to our music store
+    </header>
+
+    <section>
+        {% if instrument %}
+        <form method="POST">
+            <h1>Update an instrument</h1>
+            <input type="hidden" id="ref_num" name="ref_num" value="{{instrument['ref_num']}}"></br>
+            <label for="cat">New Category</label></br>
+            <input type="text" id="cat" name="cat" value="{{instrument['category']}}"></br>
+            <label for="name">New Instrument Name</label></br>
+            <input type="text" id="name" name="name" value="{{instrument['name']}}"></br>
+            <label for="url">New Image URL</label></br>
+            <input type="text" id="url" name="url" value="{{instrument['url']}}"></br></br>
+            <input type="submit" value="Submit">
+        </form>
+        {% endif %}
+        {% if res %}
+            <p>{{res}}</p>
+        {% endif %}
+    </section>
+    <br>
+    <a href="/instruments/show/all">See all instruments</a>
+{% endblock %}

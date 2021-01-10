@@ -1,0 +1,30 @@
+{% extends 'base.html' %}
+
+{% block head %}
+    <title>The W Music Store!!!</title>
+{% endblock %}
+
+{% block body %}
+
+    <header>
+        <img src="">
+        Welcome to our music store
+    </header>
+
+    <section>
+        <h1>This is a list of the instruments in the DB:</h1>
+
+        <h3>Result</h3>
+        {% if instruments %}
+            <ul>
+            {% for instrument in instruments %}
+            <li>[<a href="/instruments/show/{{instrument['ref_num']}}">Detail</a>|
+                <a href="/instruments/update/{{instrument['ref_num']}}">Update</a>|
+                <a href="/instruments/delete/{{instrument['ref_num']}}">Delete</a>]  {{instrument["name"]}}</li>
+            {% endfor %}
+            </ul>
+        {% endif %}
+    </section>
+    <br>
+    <a href="/">Go to root</a>
+{% endblock %}
