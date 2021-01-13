@@ -1,8 +1,11 @@
 #----------------------------------------------------------------------------#
 # Imports
 #----------------------------------------------------------------------------#
-import sqlite3, requests, random
+import sqlite3
 from flask import Flask, render_template, request, redirect, url_for, session
+import requests
+import json
+import random
 import xml.etree.ElementTree as ET
 # [MODELS]
 import instrument_model
@@ -21,40 +24,50 @@ users = {'Miguel':{
         "role": "buyer"
     }
 }
+##jan6 
+artists = ['BTS','Michael Jackson', 'Lady Gaga','ABBA','Aerosmith']
+songURL = 'https://www.songsterr.com/a/ra/songs/byartists.json'
+## end
 # instruments = [{name:"", ref_num:2342, image:"", category:""}]
 # cart = []
 # [MAIN][Admin Route]
 @app.route('/instruments/show/all')
 def show_all():
-    if 'role' in session.keys() and session['role'] == 'admin':
-        conn = sqlite3.connect("music_store.db")
-        cu = conn.cursor()
-        instrument_model.show_all(cu)
-        res = []
-        for row in cu:
-            ref_num, name, cat, url = row
-            instrument = {"ref_num":ref_num, "category": cat,"name":name, "url":url}
-            res.append(instrument)
-        conn.close()
-        print(res)
-        return render_template('index.html', instruments=res)
-    else:
-        res = 'You must be an Admin to see this page'
-        return render_template('messages.html', message= res)
+    if 'role' not in session or session['role']!='admin':
+        res = "for admin only, please login"
+        return render_template('messages.html', message=res)
+    conn = sqlite3.connect("music_store.db")
+    cu = conn.cursor()
+    instrument_model.show_all(cu)
+    res = [{"ref_num":row[0], "category": row[2],"name":row[1], "url":row[3]} for row in cu]
+    conn.close()
+    return render_template('index.html', instruments=res)
 @app.route('/instruments/show/<ref_number>')
 def show_detail_page(ref_number):
     conn = sqlite3.connect("music_store.db")
     cu = conn.cursor()
     instrument_model.show_one(cu, (ref_number,))
     ref_num, name, cat, url = cu.fetchone()
-    instrument = {"ref_num":ref_num, "category": cat,"name":name, "url":url}
-    songster = requests.get('http://www.songsterr.com/a/ra/songs.xml?pattern=Slash')
-    root = ET.fromstring(songster.content)
-    songs = []
-    for child in root:
-        songs.append(child.attrib['id'])
-    songurl= 'http://www.songsterr.com/a/wa/song?id=' + random.choice(songs)
-    instrument['songurl']= songurl
+    if cat == 'string':
+        ##add songsterr
+        artist = artists[random.randint(0,len(artists))-1]
+        r = requests.get(songURL, params={'artists':'"'+artist+'"'})
+        if r.status_code == 200:
+            j=r.json()
+            songNo = random.randint(0,len(j)-1)
+            ##songsterrURL = "http://www.songsterr.com/a/wa/song?id="+str(j[songNo]['id'])
+            instrument = {"ref_num":ref_num, "category": cat,"name":name, "url":url, "songs":j[songNo]['title'], "artist": artist}
+            # TODO: reuse the same template as detailed.html and make use of conditionals
+            # return render_template('detailed.html', instrument=instrument)
+        songster = requests.get(f'http://www.songsterr.com/a/ra/songs.xml?pattern={instrument["songs"]}')
+        root = ET.fromstring(songster.content)
+        songs = []
+        for child in root:
+            songs.append(child.attrib['id'])
+        songurl= f'http://www.songsterr.com/a/wa/song?id={songs[0]}'
+        instrument['songurl']= songurl
+    else:
+        instrument = {"ref_num":ref_num, "category": cat,"name":name, "url":url}
     return render_template('detailed.html', instrument=instrument)
 @app.route('/instruments/create', methods=["GET", "POST"])
 def create_instrument():
@@ -78,7 +91,7 @@ def create_instrument():
             res = "added!"
         else:
             res = 'oops, something happened please ask the administrator'
-        # DRY
+            # DRY
         conn.close()
         return res
     else:
@@ -143,37 +156,24 @@ def delete_instrument(ref_number):
         # return redirect(url_for('/instruments/show/all'))
 @app.route('/') #root URL
 def welcome():
+    storedName = request.cookies.get('user_id')
     conn = sqlite3.connect("music_store.db")
     cu = conn.cursor()
     instrument_model.show_all(cu)
-    res = []
-    for row in cu:
-        ref_num, name, cat, url = row
-        instrument = {"ref_num":ref_num, "category": cat,"name":name, "url":url}
-        res.append(instrument)
+    res = [{"ref_num":row[0], "category": row[2],"name":row[1], "url":row[3]} for row in cu]
     conn.close()
     return render_template("welcome.html", instruments=res)
 @app.route('/cart/add/<ref_number>')
 def add_to_cart(ref_number):
-    # try:
-    if 'role' in session.keys():
-        if session['role'] == 'buyer':
-            temp = session['cart']
-            temp.append(int(ref_number))
-            session['cart'] = temp
-            res = "added to cart!"
-            # return render_template('messages.html', message=res)
-        else:
-            res = "Don't buy stuff using your Admin acct"
-            # return render_template('messages.html', message=res)
+    if 'role' in session and session['role']=='buyer':
+        temp = session['cart']
+        temp.append(int(ref_number))
+        session['cart'] = temp
+        res = "added to cart!"
+        return render_template('messages.html', message=res)
     else:
-        res = 'Please login first'
-            # return render_template('messages.html', message=res)
-        # return render_template('messages.html', message=res)
-    # except:
-    #     res = 'Please login first (crash)'
-        # return render_template('messages.html', message=res)
-    return render_template('messages.html', message=res)
+        res = "please login as buyer" 
+        return render_template('messages.html', message=res) 
 # --- SOLUTION ---
 # reuse '/cart/show/all' 
 @app.route('/cart/show/all')
@@ -190,36 +190,28 @@ def show_cart():
     for instrument_number in cart:
         if ref_number_count.get(instrument_number) is None:
             ref_number_count[instrument_number] = 0
-        ref_number_count[instrument_number] += 1 
-    res = []
-    for row in cu:
-        ref_num, name, cat, url = row
-        if ref_num in ref_number_count:
-            instrument = {"ref_num":ref_num, 
-            "category": cat,
-            "name":name, 
-            "url":url, 
-            "count":ref_number_count[ref_num]}
-            res.append(instrument)
+        ref_number_count[instrument_number] += 1
+    res = [{"ref_num":row[0],"category":row[2],"name":row[1],"url":row[3],"count":ref_number_count[row[0]]} for row in cu if row[0] in ref_number_count]
     conn.close()
     return render_template('cart.html', cart=res)
 @app.route('/login', methods=['GET', 'POST'])
 def login():
     if request.method == 'POST':
-        if  request.form['username'] in users and users[request.form['username']]['password'] == request.form['password']:
+        if request.form['username'] in users and users[request.form['username']]['password']==request.form['password']:          
             session['username'] = request.form['username']
             session['cart'] = []
             session['role'] = users[request.form['username']]['role']
             resp = redirect(url_for('welcome'))
-            resp.set_cookie('user_id', request.form['username'])
+            resp.set_cookie('user_id', session['username'])
             session.permanent = True
             return resp
-    user_id = request.cookies.get('user_id')
-    if user_id == None:
-        user_id = ''
+        else:
+            res = "invalid user/password"
+            return render_template('messages.html', message=res)
+    user_id = request.cookies.get('user_id') or ''
     return f'''
         <form method="post">
-            <p><input type=text name=username value = {user_id}>
+            <p><input type=text name=username value={user_id}>
             <p><input type=password name=password>
             <p><input type=submit value=Login>
         </form>
@@ -229,7 +221,9 @@ def logout():
     session.pop('username')
     session.pop('cart')
     session.pop('role')
-    return redirect(url_for('welcome'))
+    resp = redirect(url_for('welcome'))
+    resp.set_cookie('user_id', '')
+    return resp
 @app.route('/greeting')
 def greeting():
     print('[DEBUG][greeting]::', session)
