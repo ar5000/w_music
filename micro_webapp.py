@@ -197,17 +197,40 @@ def show_cart():
 @app.route('/login', methods=['GET', 'POST'])
 def login():
     if request.method == 'POST':
-        if request.form['username'] in users and users[request.form['username']]['password']==request.form['password']:          
-            session['username'] = request.form['username']
-            session['cart'] = []
-            session['role'] = users[request.form['username']]['role']
-            resp = redirect(url_for('welcome'))
-            resp.set_cookie('user_id', session['username'])
-            session.permanent = True
-            return resp
+        conn = sqlite3.connect("music_store.db")
+        cu = conn.cursor()        
+        cu.execute("SELECT fla FROM creds where username = :user", {"user":request.form['username']})
+        try: #how many times has this person tried to log in?
+            attempts = cu.fetchone()[0] 
+        except:
+            attempts = 0
+        # check failed login attempts
+        if attempts < 5:
+            cu.execute("SELECT (SELECT password from creds where username=:user) = :form_pass", {"user":request.form['username'], "form_pass":request.form['password']})
+            auth = cu.fetchone() # ask sqlite "Does the password from the form match the password in the db?"
+            if bool(auth[0]):          
+                cu.execute("UPDATE creds SET fla= 0 WHERE username=:user", {"user":request.form['username']})
+                conn.commit() # reset password attempts to zero
+                session['username'] = request.form['username']
+                session['cart'] = []
+                session['role'] = users[request.form['username']]['role']
+                resp = redirect(url_for('welcome'))
+                resp.set_cookie('user_id', session['username'])
+                session.permanent = True
+                conn.close()
+                return resp
+
+            else:
+                cu.execute("UPDATE creds SET fla= fla+1 WHERE username=:user", {"user":request.form['username']})
+                conn.commit() #increment the bad login attempts
+                conn.close()
+                res = f"invalid user/password- attempt #{attempts+1}"
+                return render_template('messages.html', message=res)
         else:
-            res = "invalid user/password"
+            res = f"Your account is locked after {attempts} unsuccessful attempts"
             return render_template('messages.html', message=res)
+
+
     user_id = request.cookies.get('user_id') or ''
     return f'''
         <form method="post">
