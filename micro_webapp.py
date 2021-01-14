@@ -166,6 +166,12 @@ def welcome():
 @app.route('/cart/add/<ref_number>')
 def add_to_cart(ref_number):
     if 'role' in session and session['role']=='buyer':
+        conn = sqlite3.connect("music_store.db")
+        cu = conn.cursor()
+        #needs qty
+        cu.execute("UPDATE carts SET cart = cart || :item || ',' WHERE username=:user", {"item":ref_number, "user":session['username']})
+        conn.commit()
+
         temp = session['cart']
         temp.append(int(ref_number))
         session['cart'] = temp
@@ -178,12 +184,16 @@ def add_to_cart(ref_number):
 # reuse '/cart/show/all' 
 @app.route('/cart/show/all')
 def show_cart():
-    # Retrieve all instruments in our db
     conn = sqlite3.connect("music_store.db")
     cu = conn.cursor()
+
     instrument_model.show_all(cu)
     if session:
-        cart = session['cart']
+        try:
+            cart = session['cart']
+        except:
+            session['cart'] = []
+            cart = []
     else:
         cart = []
     ref_number_count = {}
@@ -192,13 +202,23 @@ def show_cart():
             ref_number_count[instrument_number] = 0
         ref_number_count[instrument_number] += 1
     res = [{"ref_num":row[0],"category":row[2],"name":row[1],"url":row[3],"count":ref_number_count[row[0]]} for row in cu if row[0] in ref_number_count]
+    res1 = []
+    
+    for item in session['cart']:
+        cu.execute("SELECT name, category, image FROM instruments where ref_num = :item", {"item":item})
+        res1.append(cu.fetchone())
+
+
     conn.close()
     return render_template('cart.html', cart=res)
+
+
 @app.route('/login', methods=['GET', 'POST'])
 def login():
     if request.method == 'POST':
         conn = sqlite3.connect("music_store.db")
         cu = conn.cursor()        
+        
         cu.execute("SELECT fla FROM creds where username = :user", {"user":request.form['username']})
         try: #how many times has this person tried to log in?
             attempts = cu.fetchone()[0] 
@@ -213,6 +233,11 @@ def login():
                 conn.commit() # reset password attempts to zero
                 session['username'] = request.form['username']
                 session['cart'] = []
+                cu.execute("SELECT cart FROM carts WHERE username=:user", {"user":request.form['username']})
+                dbcart = cu.fetchone()
+                if dbcart:
+                    session['cart']= dbcart[0].split(',')[:-1]
+                
                 session['role'] = users[request.form['username']]['role']
                 resp = redirect(url_for('welcome'))
                 resp.set_cookie('user_id', session['username'])
