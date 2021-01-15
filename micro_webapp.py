@@ -168,8 +168,7 @@ def add_to_cart(ref_number):
     if 'role' in session and session['role']=='buyer':
         conn = sqlite3.connect("music_store.db")
         cu = conn.cursor()
-        #needs qty
-        cu.execute("UPDATE carts SET cart = cart || :item || ',' WHERE username=:user", {"item":ref_number, "user":session['username']})
+        cu.execute("UPDATE creds SET cart = cart || :item WHERE username=:user", {"item":ref_number+',', "user":session['username']})
         conn.commit()
 
         temp = session['cart']
@@ -186,29 +185,34 @@ def add_to_cart(ref_number):
 def show_cart():
     conn = sqlite3.connect("music_store.db")
     cu = conn.cursor()
-
-    instrument_model.show_all(cu)
-    if session:
-        try:
-            cart = session['cart']
-        except:
-            session['cart'] = []
-            cart = []
-    else:
+    try: 
+        cu.execute("SELECT cart FROM creds WHERE username = :user", {"user":session['username']})
+        cart = list(map(int, cu.fetchmany()[0][0].split(',')[:-1]))
+    except:
         cart = []
+    
+    instrument_model.show_all(cu)
+    # if session:
+    #     try:
+    #         cart = session['cart']
+    #     except:
+    #         session['cart'] = []
+    #         cart = []
+    # else:
+    #     cart = []
     ref_number_count = {}
     for instrument_number in cart:
         if ref_number_count.get(instrument_number) is None:
             ref_number_count[instrument_number] = 0
         ref_number_count[instrument_number] += 1
     res = [{"ref_num":row[0],"category":row[2],"name":row[1],"url":row[3],"count":ref_number_count[row[0]]} for row in cu if row[0] in ref_number_count]
-    res1 = []
-    
-    for item in session['cart']:
-        cu.execute("SELECT name, category, image FROM instruments where ref_num = :item", {"item":item})
-        res1.append(cu.fetchone())
+   
+    # res1 = []
+    # for item in session['cart']:
+    #     cu.execute("SELECT name, category, image FROM instruments where ref_num = :item", {"item":item})
+    #     res1.append(cu.fetchone())
 
-
+    # res = 
     conn.close()
     return render_template('cart.html', cart=res)
 
@@ -236,7 +240,7 @@ def login():
                 cu.execute("SELECT cart FROM carts WHERE username=:user", {"user":request.form['username']})
                 dbcart = cu.fetchone()
                 if dbcart:
-                    session['cart']= dbcart[0].split(',')[:-1]
+                    session['cart']= list(map(int, (dbcart[0].split(',')[:-1])))
                 
                 session['role'] = users[request.form['username']]['role']
                 resp = redirect(url_for('welcome'))
