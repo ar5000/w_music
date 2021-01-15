@@ -192,14 +192,7 @@ def show_cart():
         cart = []
     
     instrument_model.show_all(cu)
-    # if session:
-    #     try:
-    #         cart = session['cart']
-    #     except:
-    #         session['cart'] = []
-    #         cart = []
-    # else:
-    #     cart = []
+
     ref_number_count = {}
     for instrument_number in cart:
         if ref_number_count.get(instrument_number) is None:
@@ -207,12 +200,6 @@ def show_cart():
         ref_number_count[instrument_number] += 1
     res = [{"ref_num":row[0],"category":row[2],"name":row[1],"url":row[3],"count":ref_number_count[row[0]]} for row in cu if row[0] in ref_number_count]
    
-    # res1 = []
-    # for item in session['cart']:
-    #     cu.execute("SELECT name, category, image FROM instruments where ref_num = :item", {"item":item})
-    #     res1.append(cu.fetchone())
-
-    # res = 
     conn.close()
     return render_template('cart.html', cart=res)
 

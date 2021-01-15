@@ -13,6 +13,22 @@
         Please fill out the form to create a new instrument.
     </p>
 
-    <p>...</p>
+    <p><form method="post">
+        <p>ref_number: <input type=text name=ref_number required>
+        <p>Name: <input type=text name=name required>
+        <p><label for="cars">Category: </label>
+           <select name="category" id="category" required>
+           <option disabled selected value> </option>
+           <option value="percussion">percussion</option>
+           <option value="string">String</option>
+           <option value="opel">Woodwind</option>
+           </select>
+        <p>Image: <input type=text name=image required></p>
+                <br><br>
+                <input type="submit" value="Submit">
+              </form>
+
+
+    </form>.</p>
 
 {% endblock %}
