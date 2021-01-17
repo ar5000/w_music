@@ -1,3 +1,4 @@
 sqlite_cheat_sheet.txt
-__pycache__/**
+__pycache__/
+.gitignore
 launch.json
