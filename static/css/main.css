@@ -27,16 +27,18 @@ section {
 }
 
 table, td, th {
-    border: 3px solid rgb(0, 0, 0);
+    border: 1px solid rgb(99, 99, 99);
+    border-collapse: collapse;
+    padding: 5px;
 }
 
 table {
-    border-collapse: collapse;
     width: 100%;
 }
 
 th {
     height: 30px;
+    text-align: left;
 }
 
 td {
@@ -50,4 +52,9 @@ td {
 
 #content {
     width: 70%
+}
+
+.add-instrument {
+    border-collapse: collapse;
+    text-align: right;
 }
