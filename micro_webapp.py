@@ -7,30 +7,13 @@ import requests
 import json
 import random
 import xml.etree.ElementTree as ET
+from instrument_helpers import getsongsterr
+
 # [MODELS]
 import instrument_model
 # [APP START]
 app = Flask(__name__)
-# Set the secret key to some random bytes. Keep this really secret!
-app.secret_key = b'this_IS_$up3r_SECUR3~'
-# Key is the username and the value is a dictionary with the password as a key
-#  and the role as another key.
-users = {'Miguel':{
-        "password": '1234',
-        "role": 'admin'
-    },
-    'Kyle':{
-        "password": "secure",
-        "role": "buyer"
-    }
-}
-##jan6 
-artists = ['BTS','Michael Jackson', 'Lady Gaga','ABBA','Aerosmith']
-songURL = 'https://www.songsterr.com/a/ra/songs/byartists.json'
-## end
-# instruments = [{name:"", ref_num:2342, image:"", category:""}]
-# cart = []
-# [MAIN][Admin Route]
+
 @app.route('/instruments/show/all')
 def show_all():
     if 'role' not in session or session['role']!='admin':
@@ -42,33 +25,22 @@ def show_all():
     res = [{"ref_num":row[0], "category": row[2],"name":row[1], "url":row[3]} for row in cu]
     conn.close()
     return render_template('index.html', instruments=res)
+
+
 @app.route('/instruments/show/<ref_number>')
 def show_detail_page(ref_number):
     conn = sqlite3.connect("music_store.db")
     cu = conn.cursor()
     instrument_model.show_one(cu, (ref_number,))
     ref_num, name, cat, url = cu.fetchone()
+    instrument = {"ref_num":ref_num, "category": cat,"name":name, "url":url}
     if cat == 'string':
-        ##add songsterr
-        artist = artists[random.randint(0,len(artists))-1]
-        r = requests.get(songURL, params={'artists':'"'+artist+'"'})
-        if r.status_code == 200:
-            j=r.json()
-            songNo = random.randint(0,len(j)-1)
-            ##songsterrURL = "http://www.songsterr.com/a/wa/song?id="+str(j[songNo]['id'])
-            instrument = {"ref_num":ref_num, "category": cat,"name":name, "url":url, "songs":j[songNo]['title'], "artist": artist}
-            # TODO: reuse the same template as detailed.html and make use of conditionals
-            # return render_template('detailed.html', instrument=instrument)
-        songster = requests.get(f'http://www.songsterr.com/a/ra/songs.xml?pattern={instrument["songs"]}')
-        root = ET.fromstring(songster.content)
-        songs = []
-        for child in root:
-            songs.append(child.attrib['id'])
-        songurl= f'http://www.songsterr.com/a/wa/song?id={songs[0]}'
-        instrument['songurl']= songurl
+        instrument['songurl']= getsongsterr()
     else:
-        instrument = {"ref_num":ref_num, "category": cat,"name":name, "url":url}
+        pass
     return render_template('detailed.html', instrument=instrument)
+
+
 @app.route('/instruments/create', methods=["GET", "POST"])
 def create_instrument():
     if request.method == "POST":    
@@ -97,6 +69,8 @@ def create_instrument():
     else:
         # this is GET
         return render_template("create_instrument.html")
+
+
 @app.route('/instruments/update/<ref_number>', methods=['GET', 'POST'])
 def update_one_instrument(ref_number):
     res = ''
@@ -128,6 +102,8 @@ def update_one_instrument(ref_number):
         ref_num, name, cat, url = cu.fetchone()
         instrument = {"ref_num":ref_num, "category": cat,"name":name, "url":url}
         return render_template('update.html', instrument=instrument, res=res)
+
+
 @app.route('/instruments/delete/<ref_number>', methods=["GET", "DELETE", "POST"])
 def delete_instrument(ref_number):
     if request.method == "POST" or  request.method == "DELETE":
@@ -154,6 +130,8 @@ def delete_instrument(ref_number):
         instrument = {"ref_num":ref_num, "category": cat,"name":name, "url":url}
         return render_template('delete.html', instrument=instrument)
         # return redirect(url_for('/instruments/show/all'))
+
+
 @app.route('/') #root URL
 def welcome():
     storedName = request.cookies.get('user_id')
@@ -163,6 +141,8 @@ def welcome():
     res = [{"ref_num":row[0], "category": row[2],"name":row[1], "url":row[3]} for row in cu]
     conn.close()
     return render_template("welcome.html", instruments=res)
+
+
 @app.route('/cart/add/<ref_number>')
 def add_to_cart(ref_number):
     if 'role' in session and session['role']=='buyer':
@@ -179,6 +159,8 @@ def add_to_cart(ref_number):
     else:
         res = "please login as buyer" 
         return render_template('messages.html', message=res) 
+
+
 # --- SOLUTION ---
 # reuse '/cart/show/all' 
 @app.route('/cart/show/all')
