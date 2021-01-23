@@ -14,6 +14,9 @@ import instrument_model
 # [APP START]
 app = Flask(__name__)
 
+# Set the secret key to some random bytes. Keep this really secret!
+app.secret_key = b'this_IS_$up3r_SECUR3~'
+
 @app.route('/instruments/show/all')
 def show_all():
     if 'role' not in session or session['role']!='admin':
@@ -206,12 +209,11 @@ def login():
                 conn.commit() # reset password attempts to zero
                 session['username'] = request.form['username']
                 session['cart'] = []
-                cu.execute("SELECT cart FROM carts WHERE username=:user", {"user":request.form['username']})
-                dbcart = cu.fetchone()
-                if dbcart:
-                    session['cart']= list(map(int, (dbcart[0].split(',')[:-1])))
-                
-                session['role'] = users[request.form['username']]['role']
+                cu.execute("SELECT cart, Role_desc FROM creds JOIN Roles ON role = Role_num WHERE creds.username=:user", {"user":request.form['username']})
+                cart, role = cu.fetchone()
+                if cart:
+                    session['cart']= list(map(int, (cart.split(',')[:-1])))
+                session['role'] = role
                 resp = redirect(url_for('welcome'))
                 resp.set_cookie('user_id', session['username'])
                 session.permanent = True
@@ -230,13 +232,14 @@ def login():
 
 
     user_id = request.cookies.get('user_id') or ''
-    return f'''
-        <form method="post">
-            <p><input type=text name=username value={user_id}>
-            <p><input type=password name=password>
-            <p><input type=submit value=Login>
-        </form>
-    '''
+    return render_template('login.html', message=user_id)
+    #     <form method="post">
+    #         <p><input type=text name=username value={user_id}>
+    #         <p><input type=password name=password>
+    #         <p><input type=submit value=Login>
+    #     </form>
+    # '''
+
 @app.route('/logout')
 def logout():
     session.pop('username')

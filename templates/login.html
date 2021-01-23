@@ -1,0 +1,16 @@
+{% extends 'base.html' %}
+{% block body %}
+    <header>
+        <img src="">
+        Welcome to our music store
+    </header>
+    <form method="post">
+        <p><input type=text name=username value={{message}}>
+        <p><input type=password name=password>
+        <p><input type=submit value=Login>
+    </form>
+    
+    <a href="/">Back to the main page</a>
+{% endblock %}
+
+
