@@ -34,28 +34,8 @@ def show_detail_page(ref_number):
 @app.route('/instruments/create', methods=["GET", "POST"])
 def create_instrument():
     if request.method == "POST":    
-        # process information in the body of the request
-        ref_num = int(request.form['ref'])
-        name = request.form['name']
-        cat = request.form['category']
-        url = request.form['url']
-        # prepare fields for insert
-        fields = (ref_num, name, cat, url)
-        # prepare connection
-        conn = sqlite3.connect("music_store.db")
-        cu = conn.cursor()
-        # instrument insert
-        instrument_model.add_one(cu, fields)
-        # check integrity of the operation
-        added_ref_num = cu.lastrowid
-        if added_ref_num == ref_num:
-            conn.commit()
-            res = "added!"
-        else:
-            res = 'oops, something happened please ask the administrator'
-            # DRY
-        conn.close()
-        return res
+        instr = instruments.Instrument(ref=int(request.form['ref']), name = request.form['name'], cat = request.form['category'], image= request.form['url']) 
+        return instr.addinstrument()
     else:
         # this is GET
         return render_template("create_instrument.html")

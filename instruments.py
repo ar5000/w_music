@@ -4,10 +4,7 @@ import xml.etree.ElementTree as ET
 
 
 class Instrument:
-
-
-
-    playable = True
+    # playable = True
     def __init__(self, ref= None, name=None, cat=None, image=None):
         self.ref = ref
         self.name = name
@@ -75,10 +72,17 @@ class Instrument:
         return (self.ref, self.name, self.cat, self.image)
 
 
-
-
     def addinstrument(self):
-        pass
+        self.cu = self.connectdb()
+        self.cu.execute("INSERT INTO instruments VALUES (?,?,?,?)", self.totuple())
+        added_ref_num = self.cu.lastrowid
+        if added_ref_num == self.ref:
+            conn.commit()
+            self.disconnectdb()
+            return 'added!'
+        else:
+            self.disconnectdb()
+            return 'oops, something happened please ask the administrator'
 
     def getallinstruments(self):
         pass
