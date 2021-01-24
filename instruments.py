@@ -71,18 +71,30 @@ class Instrument:
     def totuple(self):
         return (self.ref, self.name, self.cat, self.image)
 
-
-    def addinstrument(self):
+    def add_instrument(self):
         self.cu = self.connectdb()
         self.cu.execute("INSERT INTO instruments VALUES (?,?,?,?)", self.totuple())
         added_ref_num = self.cu.lastrowid
+
         if added_ref_num == self.ref:
             conn.commit()
             self.disconnectdb()
-            return 'added!'
+            return 'Success!'
         else:
             self.disconnectdb()
             return 'oops, something happened please ask the administrator'
+
+    def update_instrument(self):
+        self.cu = self.connectdb()
+        self.cu.execute("INSERT INTO instruments VALUES (?,?,?,?)", self.totuple())
+        rowcount = self.cu.rowcount
+        if rowcount > 0:
+            conn.commit()
+            self.disconnectdb()
+            return 'update success'
+        else:
+            return 'update failed'
+        
 
     def getallinstruments(self):
         pass

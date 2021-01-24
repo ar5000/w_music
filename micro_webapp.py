@@ -35,7 +35,7 @@ def show_detail_page(ref_number):
 def create_instrument():
     if request.method == "POST":    
         instr = instruments.Instrument(ref=int(request.form['ref']), name = request.form['name'], cat = request.form['category'], image= request.form['url']) 
-        return instr.addinstrument()
+        return instr.add_instrument()
     else:
         # this is GET
         return render_template("create_instrument.html")
@@ -43,31 +43,14 @@ def create_instrument():
 
 @app.route('/instruments/update/<ref_number>', methods=['GET', 'POST'])
 def update_one_instrument(ref_number):
-    res = ''
+    # res = ''
     if request.method == 'POST':
-        ref_num = ref_number
-        cat = request.form['cat']
-        name = request.form['name']
-        url = request.form['url']
-        # sql update operation
-        fields = (name, cat, url, ref_num)
-        # open db connection
-        conn = sqlite3.connect("music_store.db")
-        cu = conn.cursor()
-        # instrument update
-        instrument_model.update_one(cu, fields)
-        # check integrity of operation
-        if cu.rowcount > 0:
-            conn.commit()
-            res = 'update success'
-        else:
-            res = 'update failed'
-        conn.close()
-        return render_template("update.html", res=res)
+        instr = instruments.Instrument(ref=int(request.form['ref']), name = request.form['name'], cat = request.form['category'], image= request.form['url'])
+        return render_template("update.html", message=instr.update_instrument())
     else:
         # for GET methods
         instr = instruments.Instrument(ref=ref_number) 
-        return render_template('update.html', instrument=instr.todict(), res=res)
+        return render_template('update.html', instrument=instr.todict())
 
 
 @app.route('/instruments/delete/<ref_number>', methods=["GET", "DELETE", "POST"])
