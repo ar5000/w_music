@@ -2,9 +2,9 @@
 # DB CRUD for Instrument Model
 #----------------------------------------------------------------------------#
 # [READ]
-def show_all(cursor):
-    cursor.execute("SELECT * FROM instruments;")
-    pass
+# def show_all(cursor):
+#     cursor.execute("SELECT * FROM instruments;")
+#     pass
 
 # def show_one(cursor, field):
 #     cursor.execute("SELECT * FROM instruments WHERE ref_num=?", field)

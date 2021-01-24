@@ -23,14 +23,7 @@ def show_all():
     if 'role' not in session or session['role']!='admin':
         res = "for admin only, please login"
         return render_template('messages.html', message=res)
-    conn = sqlite3.connect("music_store.db")
-    cu = conn.cursor()
-    instrument_model.show_all(cu)
-    res = [{"ref_num":row[0], "category": row[2],"name":row[1], "url":row[3]} for row in cu]
-
-    # res = instrument.
-    conn.close()
-    return render_template('index.html', instruments=res)
+    return render_template('index.html', instruments=instruments.Instrument.getall())
 
 @app.route('/instruments/show/<ref_number>')
 def show_detail_page(ref_number):
@@ -156,14 +149,14 @@ def show_cart():
     except:
         cart = []
     
-    instrument_model.show_all(cu)
+    all_instr = instruments.Instrument.makelist()
 
     ref_number_count = {}
     for instrument_number in cart:
         if ref_number_count.get(instrument_number) is None:
             ref_number_count[instrument_number] = 0
         ref_number_count[instrument_number] += 1
-    res = [{"ref_num":row[0],"category":row[2],"name":row[1],"url":row[3],"count":ref_number_count[row[0]]} for row in cu if row[0] in ref_number_count]
+    res = [{"ref_num":row[0],"category":row[2],"name":row[1],"url":row[3],"count":ref_number_count[row[0]]} for row in all_instr if row[0] in ref_number_count]
    
     conn.close()
     return render_template('cart.html', cart=res)

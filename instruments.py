@@ -52,18 +52,14 @@ class Instrument:
         self.disconnectdb()
 
     @classmethod
-    def getall(cls):
+    def makelist(cls):
         cls.cu = cls.connectdb()
         cls.cu.execute("SELECT * FROM instruments")
-        # inventory = cls.cu.fetchmany()
+        return cls.cu
 
-
-        # conn = sqlite3.connect("music_store.db")
-        # cu = conn.cursor()
-        # cursor.execute("SELECT * FROM instruments;")
-
-
-        cls.res = [{"ref_num":row[0], "category": row[2],"name":row[1], "url":row[3]} for row in cls.cu]
+    @classmethod
+    def getall(cls):
+        cls.res = [{"ref_num":row[0], "category": row[2],"name":row[1], "url":row[3]} for row in cls.makelist()]
         cls.disconnectdb()
         return cls.res
         

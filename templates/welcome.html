@@ -9,8 +9,17 @@
     {% if session['username'] %}
     <header>
         <img src="">
-        Welcome to our music store, {{session['username']}}
-        <a href="{{url_for('logout')}}">Log out!</a>
+        Welcome to our music store, {{session['username']}} <p>
+        <div class="tab">
+            <input type="button" onclick="location.href='{{url_for("logout")}}';" value="Logout" />
+            <input type="button" onclick="location.href='/';" value="Top Level" />
+            <input type="button" onclick="location.href='/cart/show/all';" value="Cart" />
+            <input type="button" onclick="location.href='/instruments/show/all';" value="List Instruments" />
+            <input type="button" onclick="location.href='/instruments/create';" value="Create Instrument" />
+
+
+          </div>
+
     </header>
     {% else %}
     <header>
@@ -32,6 +41,4 @@
         {% endif %}
     </section>
     <br>
-    <a href="/">Go to root</a>
-    <a href="/cart/show/all">Go to cart</a>
 {% endblock %}

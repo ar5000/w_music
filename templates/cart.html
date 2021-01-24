@@ -6,10 +6,24 @@
 
 {% block body %}
     <header>
-        <img src="">
-        This is your cart!
+        Shopping Cart
+        {% if session['username'] %}
+            <img src="">
+             {{session['username']}} <p>
+            <div class="tab">
+                <input type="button" onclick="location.href='{{url_for("logout")}}';" value="Logout" />
+                <input type="button" onclick="location.href='/';" value="Top Level" />
+                <input type="button" onclick="location.href='/cart/show/all';" value="Cart" />
+                <input type="button" onclick="location.href='/instruments/show/all';" value="List Instruments" />
+                <input type="button" onclick="location.href='/instruments/create';" value="Create Instrument" />
+              </div>
     </header>
-
+    {% else %}
+    <header>
+        <img src="">
+        Welcome to our music store, please <a href="{{url_for('login')}}">Log in!</a>
+    </header>
+    {% endif %}
     <section>
         {% if cart %}
             These are the reference numbers of your products
@@ -24,5 +38,4 @@
         {% endif %}
     </section>
     <br>
-    <a href="/">Go to root</a>
 {% endblock %}
