@@ -1,27 +1,19 @@
 import sqlite3, requests, json, random
 import instrument_model
 import xml.etree.ElementTree as ET
+from dataclasses import dataclass
 
-
+@dataclass
 class Instrument:
-    # playable = True
-    def __init__(self, ref= None, name=None, cat=None, image=None):
-        self.ref = ref
-        self.name = name
-        self.cat = cat
-        self.image = image
-        self.songsterr = None
+    ref: int = None
+    name: str = None
+    cat: str = None
+    image: str = None
+    songsterr: str = None
+
+    def __post_init__(self):
         if self.ref and (self.name == None):
             self.getone()
-        # self.playable = playable
-        # self.played = 0
-        
-
-    def __str__(self):
-        return f"This is a {self.name} and is a {self.cat} instrument"
-
-    def __repr__(self):
-        return f"Instrument({self.ref}, {self.name}, {self.cat})"
 
     @classmethod
     def connectdb(cls):
@@ -87,7 +79,6 @@ class Instrument:
     def update_instrument(self):
         self.cu = self.connectdb()
 
-        # UPDATE instruments SET name=?, category=?,  image=? WHERE ref_num=?''
         self.cu.execute("UPDATE instruments SET name = :name, category = :cat, image = :image where ref_num = :ref", {"name":self.name, "cat":self.cat, "image":self.image, "ref":self.ref})
         rowcount = self.cu.rowcount
         if rowcount > 0:
