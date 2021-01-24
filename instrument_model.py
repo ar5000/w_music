@@ -16,13 +16,13 @@
 #     cursor.execute("INSERT INTO instruments VALUES (?,?,?,?)", fields)
 #     pass
 # [UPDATE]
-def update_one(cursor, fields):
-    cursor.execute('''UPDATE instruments 
-    SET name=?, 
-        category=?, 
-        image=?
-    WHERE ref_num=?''', fields)
-    pass
+# def update_one(cursor, fields):
+#     cursor.execute('''UPDATE instruments 
+#     SET name=?, 
+#         category=?, 
+#         image=?
+#     WHERE ref_num=?''', fields)
+#     pass
 # [DELETE]
 def delete_one(cursor, field):
     cursor.execute('''DELETE FROM instruments

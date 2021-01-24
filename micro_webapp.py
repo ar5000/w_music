@@ -46,11 +46,11 @@ def update_one_instrument(ref_number):
     # res = ''
     if request.method == 'POST':
         instr = instruments.Instrument(ref=int(request.form['ref']), name = request.form['name'], cat = request.form['category'], image= request.form['url'])
-        return render_template("update.html", message=instr.update_instrument())
+        return render_template("new_update.html", message=instr.update_instrument())
     else:
         # for GET methods
         instr = instruments.Instrument(ref=ref_number) 
-        return render_template('update.html', instrument=instr.todict())
+        return render_template('new_update.html', instrument=instr.todict())
 
 
 @app.route('/instruments/delete/<ref_number>', methods=["GET", "DELETE", "POST"])

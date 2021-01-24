@@ -20,12 +20,12 @@
                 <input type="button" onclick="location.href='/instruments/create';" value="Create Instrument" />
               </div>
     </header>
-    {% else %}
+        {% else %}
     <header>
         <img src="">
         Welcome to our music store, please <a href="{{url_for('login')}}">Log in!</a>
     </header>
-    {% endif %}
+        {% endif %}
     {% block body %}{% endblock %}
 </body>
 </html>

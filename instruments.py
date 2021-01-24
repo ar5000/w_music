@@ -49,13 +49,13 @@ class Instrument:
         self.disconnectdb()
 
     @classmethod
-    def makelist(cls):
+    def makelist(cls): # sometimes you need a tuple
         cls.cu = cls.connectdb()
         cls.cu.execute("SELECT * FROM instruments")
         return cls.cu
 
     @classmethod
-    def getall(cls):
+    def getall(cls): # sometimes you need some a dict
         cls.res = [{"ref_num":row[0], "category": row[2],"name":row[1], "url":row[3]} for row in cls.makelist()]
         cls.disconnectdb()
         return cls.res
@@ -86,7 +86,9 @@ class Instrument:
 
     def update_instrument(self):
         self.cu = self.connectdb()
-        self.cu.execute("INSERT INTO instruments VALUES (?,?,?,?)", self.totuple())
+
+        # UPDATE instruments SET name=?, category=?,  image=? WHERE ref_num=?''
+        self.cu.execute("UPDATE instruments SET name = :name, category = :cat, image = :image where ref_num = :ref", {"name":self.name, "cat":self.cat, "image":self.image, "ref":self.ref})
         rowcount = self.cu.rowcount
         if rowcount > 0:
             conn.commit()
@@ -96,10 +98,7 @@ class Instrument:
             return 'update failed'
         
 
-    def getallinstruments(self):
-        pass
-    def addtocart(self):
-        pass
+
 
     # def increase_play_count(self):
     #     self.played += 1

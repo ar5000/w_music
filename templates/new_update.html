@@ -1,0 +1,61 @@
+{% extends 'base.html' %}
+
+{% block head %}
+    <title>The W Music Store!!!</title>
+    <style>
+        table, th, td {
+            border: 0px;
+            border-collapse: collapse;
+        }
+
+    </style>
+
+{% endblock %}
+
+{% block body %}
+
+<section>
+    {% if instrument %}
+
+    <p><p><form method="post">
+        <table class="add_instrument">
+            <caption>Please fill out the form to create a new instrument.</caption>
+            <tr>
+                <td style="text-align: right">ref_number: </td>
+                <td style="text-align: left"><input type=text name=ref value="{{instrument['ref_num']}}" readonly></td>
+
+            </tr>
+            <tr>
+                <td style="text-align: right">Name:</td>
+                <td style="text-align: left"><input type=text name=name value="{{instrument['name']}}" required></td>
+
+            </tr>
+            <tr>
+                <td style="text-align: right">Category:</td>
+                <td style= "text-align: left"><select name="category" id="category" value="{{instrument['category']}}" required>
+                    <option selected value> </option>
+                    <option value="percussion">percussion</option>
+                    <option value="string">String</option>
+                    <option value="woodwind">Woodwind</option>
+                    </select></td>
+
+            </tr>
+            <tr>
+                <td style="text-align: right">Image URL:</td>
+                <td style="text-align: left"><input type=text name=url value="{{instrument['url']}}" required></td>
+ 
+            </tr>
+            <tr>
+                <td></td>
+                <td style="text-align: left"><input type="submit" value="Submit"></td>
+                </form>
+            </tr>
+
+        </table>
+    {% endif %}
+    <section>
+        {% if message %}
+            <p>{{message}}</p>
+        {% endif %}
+    </section>
+{% endblock %}
