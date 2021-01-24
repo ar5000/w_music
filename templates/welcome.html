@@ -6,28 +6,6 @@
 
 {% block body %}
 
-    {% if session['username'] %}
-    <header>
-        <img src="">
-        Welcome to our music store, {{session['username']}} <p>
-        <div class="tab">
-            <input type="button" onclick="location.href='{{url_for("logout")}}';" value="Logout" />
-            <input type="button" onclick="location.href='/';" value="Top Level" />
-            <input type="button" onclick="location.href='/cart/show/all';" value="Cart" />
-            <input type="button" onclick="location.href='/instruments/show/all';" value="List Instruments" />
-            <input type="button" onclick="location.href='/instruments/create';" value="Create Instrument" />
-
-
-          </div>
-
-    </header>
-    {% else %}
-    <header>
-        <img src="">
-        Welcome to our music store, please <a href="{{url_for('login')}}">Log in!</a>
-    </header>
-    {% endif %}
-
     <section>
         <h1>Take a look at the instruments in our store</h1>
 
