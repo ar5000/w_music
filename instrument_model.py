@@ -6,9 +6,9 @@ def show_all(cursor):
     cursor.execute("SELECT * FROM instruments;")
     pass
 
-def show_one(cursor, field):
-    cursor.execute("SELECT * FROM instruments WHERE ref_num=?", field)
-    pass
+# def show_one(cursor, field):
+#     cursor.execute("SELECT * FROM instruments WHERE ref_num=?", field)
+#     pass
 # [CREATE]
 def add_one(cursor, fields):
     # ref, name, category, url

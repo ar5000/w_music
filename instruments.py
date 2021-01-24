@@ -4,6 +4,9 @@ import xml.etree.ElementTree as ET
 
 
 class Instrument:
+
+
+
     playable = True
     def __init__(self, ref= None, name=None, cat=None, image=None):
         self.ref = ref
@@ -23,9 +26,15 @@ class Instrument:
     def __repr__(self):
         return f"Instrument({self.ref}, {self.name}, {self.cat})"
 
-    def connectdb(self):
+    @classmethod
+    def connectdb(cls):
+        global conn
         conn = sqlite3.connect("music_store.db")
         return conn.cursor()
+
+    @classmethod
+    def disconnectdb(cls):
+        conn.close()
 
     def getsongsterr(self):
         artists = ['Chet Atkins','Chuck Berry', 'Eric Clapton','Stevie Ray Vaughan','Jimi Hendrix']
@@ -40,6 +49,23 @@ class Instrument:
         cu = self.connectdb()
         cu.execute("SELECT * FROM instruments WHERE ref_num= :ref", {"ref":self.ref})
         self.ref, self.name, self.cat, self.image = cu.fetchone()
+        self.disconnectdb()
+
+    @classmethod
+    def getall(cls):
+        cls.cu = cls.connectdb()
+        cls.cu.execute("SELECT * FROM instruments")
+        # inventory = cls.cu.fetchmany()
+
+
+        # conn = sqlite3.connect("music_store.db")
+        # cu = conn.cursor()
+        # cursor.execute("SELECT * FROM instruments;")
+
+
+        cls.res = [{"ref_num":row[0], "category": row[2],"name":row[1], "url":row[3]} for row in cls.cu]
+        cls.disconnectdb()
+        return cls.res
         
     def todict(self):
         if self.cat == 'string':
@@ -51,6 +77,8 @@ class Instrument:
 
     def totuple(self):
         return (self.ref, self.name, self.cat, self.image)
+
+
 
 
     def addinstrument(self):

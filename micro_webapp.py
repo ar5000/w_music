@@ -93,12 +93,8 @@ def update_one_instrument(ref_number):
         return render_template("update.html", res=res)
     else:
         # for GET methods
-        conn = sqlite3.connect("music_store.db")
-        cu = conn.cursor()
-        instrument_model.show_one(cu, (ref_number,))
-        ref_num, name, cat, url = cu.fetchone()
-        instrument = {"ref_num":ref_num, "category": cat,"name":name, "url":url}
-        return render_template('update.html', instrument=instrument, res=res)
+        instr = instruments.Instrument(ref=ref_number) 
+        return render_template('update.html', instrument=instr.todict(), res=res)
 
 
 @app.route('/instruments/delete/<ref_number>', methods=["GET", "DELETE", "POST"])
@@ -120,24 +116,14 @@ def delete_instrument(ref_number):
             return res
         return render_template('delete.html', res=res)
     else:
-        conn = sqlite3.connect("music_store.db")
-        cu = conn.cursor()
-        instrument_model.show_one(cu, (ref_number,))
-        ref_num, name, cat, url = cu.fetchone()
-        instrument = {"ref_num":ref_num, "category": cat,"name":name, "url":url}
-        return render_template('delete.html', instrument=instrument)
+        instr = instruments.Instrument(ref=ref_number) 
+        return render_template('delete.html', instrument=instr.todict())
         # return redirect(url_for('/instruments/show/all'))
 
 
 @app.route('/') #root URL
 def welcome():
-    storedName = request.cookies.get('user_id')
-    conn = sqlite3.connect("music_store.db")
-    cu = conn.cursor()
-    instrument_model.show_all(cu)
-    res = [{"ref_num":row[0], "category": row[2],"name":row[1], "url":row[3]} for row in cu]
-    conn.close()
-    return render_template("welcome.html", instruments=res)
+    return render_template("welcome.html", instruments=instruments.Instrument.getall())
 
 
 @app.route('/cart/add/<ref_number>')
