@@ -8,6 +8,7 @@ import json
 import random
 import xml.etree.ElementTree as ET
 from instrument_helpers import getsongsterr
+from instruments import Instrument
 
 # [MODELS]
 import instrument_model
@@ -26,22 +27,28 @@ def show_all():
     cu = conn.cursor()
     instrument_model.show_all(cu)
     res = [{"ref_num":row[0], "category": row[2],"name":row[1], "url":row[3]} for row in cu]
+
+    # res = instrument.
     conn.close()
     return render_template('index.html', instruments=res)
-
 
 @app.route('/instruments/show/<ref_number>')
 def show_detail_page(ref_number):
     conn = sqlite3.connect("music_store.db")
     cu = conn.cursor()
     instrument_model.show_one(cu, (ref_number,))
-    ref_num, name, cat, url = cu.fetchone()
-    instrument = {"ref_num":ref_num, "category": cat,"name":name, "url":url}
-    if cat == 'string':
-        instrument['songurl']= getsongsterr()
-    else:
-        pass
-    return render_template('detailed.html', instrument=instrument)
+    # ref_num, name, cat, url = cu.fetchone()
+    
+    instr = Instrument(cu.fetchone()) 
+
+
+    # instrument = {"ref_num":ref_num, "category": cat,"name":name, "url":url}
+    
+    # if instrument['cat'] == 'string': #todo put into Instrument class
+    #     instrument['songurl']= getsongsterr()
+    # else:
+    #     pass
+    return render_template('detailed.html', instrument=instr.todict())
 
 
 @app.route('/instruments/create', methods=["GET", "POST"])
