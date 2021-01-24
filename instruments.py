@@ -53,6 +53,9 @@ class Instrument:
     def totuple(self):
         return (self.ref, self.name, self.category, self.image)
 
+    def todict(self):
+        return {"ref_num":self.ref_num, "category": self.cat,"name":self.name, "url":self.url}
+
     def increase_play_count(self):
         self.played += 1
 
@@ -74,10 +77,11 @@ class Instrument:
             res = f"oh no, {inst.name} seems to be broken!"
         return res
 
+
+
     def addinstrument:
 
     def getallinstruments:
     
     def addtocart:
-    
     
