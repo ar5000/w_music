@@ -4,7 +4,6 @@ import xml.etree.ElementTree as ET
 from dataclasses import dataclass
 
 class Datastore():
-
     @staticmethod  
     def connectdb():
         global conn
@@ -14,6 +13,13 @@ class Datastore():
     @staticmethod
     def disconnectdb():
         conn.close()
+
+
+    def validate(self, ref):
+        if len(str(ref)) < 6:
+            raise ref_too_short
+        if len(str(ref)) > 6:
+            raise ref_too_long
 
 
 @dataclass
@@ -27,16 +33,6 @@ class Instrument(Datastore):
     def __post_init__(self):
         if self.ref and (self.name == None):
             self.getone()
-
-    # @staticmethod  
-    # def connectdb():
-    #     global conn
-    #     conn = sqlite3.connect("music_store.db")
-    #     return conn.cursor()
-
-    # @staticmethod
-    # def disconnectdb():
-    #     conn.close()
 
     def getsongsterr(self):
         artists = ['Chet Atkins','Chuck Berry', 'Eric Clapton','Stevie Ray Vaughan','Jimi Hendrix']
@@ -77,6 +73,11 @@ class Instrument(Datastore):
         return (self.ref, self.name, self.cat, self.image)
 
     def add_instrument(self):
+        try: 
+            super().validate(self.ref)
+        except:
+            return 'Please use a 6-digit ref number'
+
         self.cu = super().connectdb()
         self.cu.execute("INSERT INTO instruments VALUES (?,?,?,?)", self.totuple())
         added_ref_num = self.cu.lastrowid
@@ -102,7 +103,11 @@ class Instrument(Datastore):
             return 'update failed'
         
 
+class ref_too_short(ValueError):
+    pass
 
+class ref_too_long(ValueError):
+    pass
 
     # def increase_play_count(self):
     #     self.played += 1
@@ -146,6 +151,3 @@ class Instrument(Datastore):
 #        cursor.execute("INSERT INTO instruments VALUES (?,?,?,?)", fields)
 #        return 
 
-
-class NewInstrument(Instrument, Datastore):
-    pass
