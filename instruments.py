@@ -3,8 +3,21 @@ import instrument_model
 import xml.etree.ElementTree as ET
 from dataclasses import dataclass
 
+class Datastore():
+
+    @staticmethod  
+    def connectdb():
+        global conn
+        conn = sqlite3.connect("music_store.db")
+        return conn.cursor()
+
+    @staticmethod
+    def disconnectdb():
+        conn.close()
+
+
 @dataclass
-class Instrument:
+class Instrument(Datastore):
     ref: int = None
     name: str = None
     cat: str = None
@@ -15,15 +28,15 @@ class Instrument:
         if self.ref and (self.name == None):
             self.getone()
 
-    @classmethod
-    def connectdb(cls):
-        global conn
-        conn = sqlite3.connect("music_store.db")
-        return conn.cursor()
+    # @staticmethod  
+    # def connectdb():
+    #     global conn
+    #     conn = sqlite3.connect("music_store.db")
+    #     return conn.cursor()
 
-    @classmethod
-    def disconnectdb(cls):
-        conn.close()
+    # @staticmethod
+    # def disconnectdb():
+    #     conn.close()
 
     def getsongsterr(self):
         artists = ['Chet Atkins','Chuck Berry', 'Eric Clapton','Stevie Ray Vaughan','Jimi Hendrix']
@@ -35,21 +48,21 @@ class Instrument:
         return 'http://www.songsterr.com/a/wa/song?id=' + random.choice(songs)
 
     def getone(self):
-        cu = self.connectdb()
+        cu = super().connectdb()
         cu.execute("SELECT * FROM instruments WHERE ref_num= :ref", {"ref":self.ref})
         self.ref, self.name, self.cat, self.image = cu.fetchone()
-        self.disconnectdb()
+        super().disconnectdb()
 
     @classmethod
     def makelist(cls): # sometimes you need a tuple
-        cls.cu = cls.connectdb()
+        cls.cu = super().connectdb()
         cls.cu.execute("SELECT * FROM instruments")
         return cls.cu
 
     @classmethod
     def getall(cls): # sometimes you need some a dict
         cls.res = [{"ref_num":row[0], "category": row[2],"name":row[1], "url":row[3]} for row in cls.makelist()]
-        cls.disconnectdb()
+        super().disconnectdb()
         return cls.res
         
     def todict(self):
@@ -64,26 +77,26 @@ class Instrument:
         return (self.ref, self.name, self.cat, self.image)
 
     def add_instrument(self):
-        self.cu = self.connectdb()
+        self.cu = super().connectdb()
         self.cu.execute("INSERT INTO instruments VALUES (?,?,?,?)", self.totuple())
         added_ref_num = self.cu.lastrowid
 
         if added_ref_num == self.ref:
             conn.commit()
-            self.disconnectdb()
+            super().disconnectdb()
             return 'Success!'
         else:
-            self.disconnectdb()
+            super().disconnectdb()
             return 'oops, something happened please ask the administrator'
 
     def update_instrument(self):
-        self.cu = self.connectdb()
+        self.cu = super().connectdb()
 
         self.cu.execute("UPDATE instruments SET name = :name, category = :cat, image = :image where ref_num = :ref", {"name":self.name, "cat":self.cat, "image":self.image, "ref":self.ref})
         rowcount = self.cu.rowcount
         if rowcount > 0:
             conn.commit()
-            self.disconnectdb()
+            super().disconnectdb()
             return 'update success'
         else:
             return 'update failed'
@@ -114,11 +127,6 @@ class Instrument:
 
 
 
-
-
-# class Datastore:
-#     def __init__(self):
-
 #     def login(self, username, password):
 
 #     def logout(self):
@@ -137,3 +145,7 @@ class Instrument:
 #     def setsomedatat(self, fields):
 #        cursor.execute("INSERT INTO instruments VALUES (?,?,?,?)", fields)
 #        return 
+
+
+class NewInstrument(Instrument, Datastore):
+    pass

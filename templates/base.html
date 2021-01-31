@@ -13,12 +13,12 @@
             <img src="">
              {{session['username']}} <p>
             <div class="tab">
-                <input type="button" onclick="location.href='{{url_for("logout")}}';" value="Logout" />
                 <input type="button" onclick="location.href='/';" value="Top Level" />
                 <input type="button" onclick="location.href='/cart/show/all';" value="Cart" />
                 <input type="button" onclick="location.href='/instruments/show/all';" value="List Instruments" />
                 <input type="button" onclick="location.href='/instruments/create';" value="Create Instrument" />
-              </div>
+                <input type="button" onclick="location.href='{{url_for("logout")}}';" value="Logout" />
+            </div>
     </header>
         {% else %}
     <header>
