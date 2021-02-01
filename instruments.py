@@ -60,6 +60,13 @@ class Instrument(Datastore):
         cls.res = [{"ref_num":row[0], "category": row[2],"name":row[1], "url":row[3]} for row in cls.makelist()]
         super().disconnectdb()
         return cls.res
+
+    @classmethod
+    def getreviews(cls,ref):
+        cls.cu = cls.connectdb()
+        cls.cu.execute("SELECT * FROM reviews WHERE ref = :ref", {"ref":ref})
+        cls.disconnectdb()
+        return  cls.cu
         
     def todict(self):
         if self.cat == 'string':
