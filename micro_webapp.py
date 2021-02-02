@@ -2,7 +2,7 @@
 # Imports
 #----------------------------------------------------------------------------#
 import sqlite3
-from flask import Flask, render_template, request, redirect, url_for, session
+from flask import Flask, render_template, request, redirect, url_for, session, send_file
 import requests
 import json
 import random
@@ -18,6 +18,16 @@ app = Flask(__name__)
 # Set the secret key to some random bytes. Keep this really secret!
 app.secret_key = b'this_IS_$up3r_SECUR3~'
 
+# @app.route('/vuv.png')
+# def vuv():
+#     return url_for('static', filename='vuv.png')
+
+# app.add_url_rule('/vuv.png', redirect_to=url_for('static', filename='vuv.png'))
+
+
+# app.add_url_rule('/favicon.ico',
+#                  redirect_to=url_for('static', filename='favicon.ico'))
+
 @app.route('/instruments/show/all')
 def show_all():
     if 'role' not in session or session['role']!='admin':
@@ -29,7 +39,7 @@ def show_all():
 def show_detail_page(ref_number):
     instr = instruments.Instrument(ref=ref_number)
     reviews = instruments.Review.get_all_reviews(ref_number)
-    return render_template('detailed.html', instrument=instr.todict(), review= reviews)
+    return render_template('detailed.html', instrument=instr.todict(), reviews= reviews)
 
 
 @app.route('/instruments/create', methods=["GET", "POST"])

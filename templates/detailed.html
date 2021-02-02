@@ -18,12 +18,31 @@
     </section>
     {% endif %}    
     <br>
-    Reviews:
-    {{review}}
-    {% for review in reviews %}
-        {{review["id"]}}, {{review["stars"]}}, {{review["review"]}}, {{review['verified']}}, {{review['sentiment']}}
+    <style>
+        td {
+          border: 1px solid black;
+          border-collapse: collapse;
+          text-align: left;
+        }
+        </style>
 
+    <table class="reviews" style="width:80%">
+    <caption> Customer Reviews</caption>
+    <th>Username</th>
+    <th>Vuvulelas(stars)</th>
+    <th>Review</th>
+    <th>Verfied Purchase?</th>
+    <th>Sentiment</th>
+    {% for review in reviews %}
+        <tr><td>{{review["id"]}}</td>
+            <td>{% for star in range(review["stars"]) %} <img src="{{ url_for('static', filename='vuv.png')}}" alt="vuvuzela" width="20" height="40"> {% endfor %}</td>
+            <td>{{review["review"]}}</td>
+            <td>{{review['verified']}}</td>
+            <td>{{review['sentiment']}}</td>
+        </tr>
     {% endfor %}
+    </table>
+    <br><br>
     <form method="post">
         <table class="add_instrument">
             <caption>Leave your own review</caption>

@@ -50,7 +50,7 @@ class Review(Datastore):
     def get_all_reviews(ref):
         cu = Datastore.connectdb()
         cu.execute("SELECT * FROM reviews WHERE ref = :ref", {"ref":ref})
-        reviews= [{"id":row[1], "review":row[2], "verified":row[3], "sentiment":row[4]} for row in cu.fetchall()]   
+        reviews= [{"id":row[1], "stars":row[2], "review":row[3], "verified":row[4], "sentiment":row[5]} for row in cu.fetchall()]   
         Datastore.disconnectdb()
         return reviews
 
