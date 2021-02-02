@@ -27,8 +27,9 @@ def show_all():
 
 @app.route('/instruments/show/<ref_number>')
 def show_detail_page(ref_number):
-    instr = instruments.Instrument(ref=ref_number) 
-    return render_template('detailed.html', instrument=instr.todict())
+    instr = instruments.Instrument(ref=ref_number)
+    reviews = instruments.Review.get_all_reviews(ref_number)
+    return render_template('detailed.html', instrument=instr.todict(), review= reviews)
 
 
 @app.route('/instruments/create', methods=["GET", "POST"])

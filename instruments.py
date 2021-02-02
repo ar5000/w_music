@@ -21,6 +21,56 @@ class Datastore():
         if len(str(ref)) > 6:
             raise ref_too_long
 
+@dataclass
+class Review(Datastore):
+    ref: int
+    id: str = None
+    stars: int = None
+    review: str = None
+    verified: bool = False
+    sentiment: int = None
+
+    def __post_init__(self):
+        if self.stars:
+            self.add_review()
+        
+    def add_review(self):
+        self.cu = super().connectdb()
+        self.cu.execute("INSERT INTO reviews ref= :ref, id= :id, stars= :stars, review= :review, verified= :verified, sentiment= :sentiment", {"ref": self.ref, "id": self.id, "stars": self.stars, "review": self.review, "verified": self.verified, "sentiment": self.sentiment})
+        added_review = self.cu.lastrowid
+        if added_review == self.ref:
+            conn.commit()
+            super().disconnectdb()
+            return 'Review Added'
+        else:
+            super().disconnectdb()
+            return 'Something messed up!'
+
+    @staticmethod
+    def get_all_reviews(ref):
+        cu = Datastore.connectdb()
+        cu.execute("SELECT * FROM reviews WHERE ref = :ref", {"ref":ref})
+        reviews= [{"id":row[1], "review":row[2], "verified":row[3], "sentiment":row[4]} for row in cu.fetchall()]   
+        Datastore.disconnectdb()
+        return reviews
+
+'''
+   @classmethod
+    def makelist(cls): # sometimes you need a tuple
+        cls.cu = super().connectdb()
+        cls.cu.execute("SELECT * FROM instruments")
+        return cls.cu
+
+    @classmethod
+    def getall(cls): # sometimes you need some a dict
+        cls.res = [{"ref_num":row[0], "category": row[2],"name":row[1], "url":row[3]} for row in cls.makelist()]
+        super().disconnectdb()
+        return cls.res
+
+'''
+
+
+
 
 @dataclass
 class Instrument(Datastore):
@@ -29,10 +79,13 @@ class Instrument(Datastore):
     cat: str = None
     image: str = None
     songsterr: str = None
+    reviews: list = None
 
     def __post_init__(self):
         if self.ref and (self.name == None):
             self.getone()
+            # review = Review(self.ref)
+            # self.reviews = review.get_all_reviews()
 
     def getsongsterr(self):
         artists = ['Chet Atkins','Chuck Berry', 'Eric Clapton','Stevie Ray Vaughan','Jimi Hendrix']
@@ -61,17 +114,17 @@ class Instrument(Datastore):
         super().disconnectdb()
         return cls.res
 
-    @classmethod
-    def getreviews(cls,ref):
-        cls.cu = cls.connectdb()
-        cls.cu.execute("SELECT * FROM reviews WHERE ref = :ref", {"ref":ref})
-        cls.disconnectdb()
-        return  cls.cu
+    # def getreviews(self,ref):
+    #     self.cu = self.connectdb()
+    #     self.cu.execute("SELECT * FROM reviews WHERE ref = :ref", {"ref":ref})
+    #     review = self.cu
+    #     self.disconnectdb()
+    #     return  self.cu
         
     def todict(self):
         if self.cat == 'string':
             self.songsterr = self.getsongsterr()
-        return {"ref_num":self.ref, "category": self.cat,"name":self.name, "url":self.image, "songurl": self.songsterr}
+        return {"ref_num":self.ref, "category": self.cat,"name":self.name, "url":self.image, "songurl": self.songsterr, "reviews":self.reviews}
 
     def fromtuple(self, fields):
         self.ref, self.name, self.cat, self.image = fields

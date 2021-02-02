@@ -18,5 +18,40 @@
     </section>
     {% endif %}    
     <br>
+    Reviews:
+    {{review}}
+    {% for review in reviews %}
+        {{review["id"]}}, {{review["stars"]}}, {{review["review"]}}, {{review['verified']}}, {{review['sentiment']}}
+
+    {% endfor %}
+    <form method="post">
+        <table class="add_instrument">
+            <caption>Leave your own review</caption>
+            <tr>
+                <td style="text-align: right">Review:</td>
+                <td style="text-align: left"><input type=text name=name required></td>
+
+            </tr>
+            <tr>
+                <td style="text-align: right">Stars:</td>
+                <td style= "text-align: left"><select name="category" id="category" required>
+                    <option disabled selected value> </option>
+                    <option value="1">*</option>
+                    <option value="2">**</option>
+                    <option value="3">***</option>
+                    <option value="4">****</option>
+                    <option value="5">*****</option>
+                    </select></td>
+
+            </tr>
+            <tr>
+                <td></td>
+                <td style="text-align: left"><input type="submit" value="Submit"></td>
+                </form>
+            </tr>
+
+        </table>
+
+
     <a href="/">Back to the main page</a>
 {% endblock %}
