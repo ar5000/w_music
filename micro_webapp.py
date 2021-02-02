@@ -18,16 +18,6 @@ app = Flask(__name__)
 # Set the secret key to some random bytes. Keep this really secret!
 app.secret_key = b'this_IS_$up3r_SECUR3~'
 
-# @app.route('/vuv.png')
-# def vuv():
-#     return url_for('static', filename='vuv.png')
-
-# app.add_url_rule('/vuv.png', redirect_to=url_for('static', filename='vuv.png'))
-
-
-# app.add_url_rule('/favicon.ico',
-#                  redirect_to=url_for('static', filename='favicon.ico'))
-
 @app.route('/instruments/show/all')
 def show_all():
     if 'role' not in session or session['role']!='admin':
@@ -35,11 +25,16 @@ def show_all():
         return render_template('messages.html', message=res)
     return render_template('index.html', instruments=instruments.Instrument.getall())
 
-@app.route('/instruments/show/<ref_number>')
+@app.route('/instruments/show/<ref_number>', methods=["GET", "POST"])
 def show_detail_page(ref_number):
     instr = instruments.Instrument(ref=ref_number)
     reviews = instruments.Review.get_all_reviews(ref_number)
-    return render_template('detailed.html', instrument=instr.todict(), reviews= reviews)
+    message = ''
+    if request.method == "POST":
+        review = instruments.Review(ref=int(request.form['ref']), id= session['username'], stars= request.form['stars'], review= request['review'])
+        message = review.post_review()
+    return render_template("detailed.html", instrument=instr.todict(), reviews= reviews, message= message)
+
 
 
 @app.route('/instruments/create', methods=["GET", "POST"])
@@ -50,6 +45,8 @@ def create_instrument():
     else:
         # this is GET
         return render_template("create_instrument.html")
+
+
 
 
 @app.route('/instruments/update/<ref_number>', methods=['GET', 'POST'])

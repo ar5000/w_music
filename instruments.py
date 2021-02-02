@@ -31,10 +31,10 @@ class Review(Datastore):
     sentiment: int = None
 
     def __post_init__(self):
-        if self.stars:
-            self.add_review()
+        pass
         
-    def add_review(self):
+        
+    def post_review(self):
         self.cu = super().connectdb()
         self.cu.execute("INSERT INTO reviews ref= :ref, id= :id, stars= :stars, review= :review, verified= :verified, sentiment= :sentiment", {"ref": self.ref, "id": self.id, "stars": self.stars, "review": self.review, "verified": self.verified, "sentiment": self.sentiment})
         added_review = self.cu.lastrowid
