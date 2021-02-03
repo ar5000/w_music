@@ -35,7 +35,7 @@
     <th>Sentiment</th>
     {% for review in reviews %}
         <tr><td>{{review["id"]}}</td>
-            <td>{% for star in range(review["stars"]) %} <img src="{{ url_for('static', filename='vuv.png')}}" alt="vuvuzela" width="20" height="40"> {% endfor %}</td>
+            <td>{% for star in range(review["stars"]) %} <img src="{{ url_for('static', filename='vuv.png')}}" alt="vuvuzela" width="20" height="40"> {% endfor %} {% for star in range(5-review["stars"]) %} <img src="{{ url_for('static', filename='vuv-0.png')}}" alt="vuvuzela" width="20" height="40"> {% endfor %}</td>
             <td>{{review["review"]}}</td>
             <td>{{review['verified']}}</td>
             <td>{{review['sentiment']}}</td>
@@ -44,16 +44,18 @@
     </table>
     <br><br>
     <form method="post">
+        <input type="hidden" id="ref" name="ref" value="{{instrument['ref_num']}}">
+        <input type="hidden" id="username" name="username" value="{{session['username']}}">
         <table class="review_instrument">
             <caption>Leave your own review</caption>
             <tr>
                 <td style="text-align: right">Review:</td>
-                <td style="text-align: left"><input type=text name=name required></td>
+                <td style="text-align: left"><input type=text name="review" required></td>
 
             </tr>
             <tr>
                 <td style="text-align: right">Stars:</td>
-                <td style= "text-align: left"><select name="category" id="category" required>
+                <td style= "text-align: left"><select name=stars id="stars" required>
                     <option disabled selected value> </option>
                     <option value="1">*</option>
                     <option value="2">**</option>

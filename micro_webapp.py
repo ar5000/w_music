@@ -27,12 +27,12 @@ def show_all():
 
 @app.route('/instruments/show/<ref_number>', methods=["GET", "POST"])
 def show_detail_page(ref_number):
+    message = ''
+    if request.method == "POST": 
+        review = instruments.Review(ref=int(request.form['ref']), id= request.form['username'], stars= request.form['stars'], review= request.form['review'])
+        message = review.post_review()
     instr = instruments.Instrument(ref=ref_number)
     reviews = instruments.Review.get_all_reviews(ref_number)
-    message = ''
-    if request.method == "POST":
-        review = instruments.Review(ref=int(request.form['ref']), id= session['username'], stars= request.form['stars'], review= request['review'])
-        message = review.post_review()
     return render_template("detailed.html", instrument=instr.todict(), reviews= reviews, message= message)
 
 

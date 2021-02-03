@@ -32,13 +32,19 @@ class Review(Datastore):
 
     def __post_init__(self):
         pass
-        
+    
+    def verified_purchase(self):
+        # self.cu = super().connectdb()
+        self.cu.execute("SELECT COUNT(id) from purchase_history where ref= :ref and id= :id", {"ref": self.ref, "id": self.id})
+        self.verified = bool(self.cu.fetchone()[0])
+        # super().disconnectdb()
+        return self.verified
         
     def post_review(self):
         self.cu = super().connectdb()
-        self.cu.execute("INSERT INTO reviews ref= :ref, id= :id, stars= :stars, review= :review, verified= :verified, sentiment= :sentiment", {"ref": self.ref, "id": self.id, "stars": self.stars, "review": self.review, "verified": self.verified, "sentiment": self.sentiment})
-        added_review = self.cu.lastrowid
-        if added_review == self.ref:
+        self.cu.execute("insert into reviews VALUES (?,?,?,?,?,?)", (self.ref, self.id, self.stars, self.review, self.verified_purchase(), self.sentiment))
+        self.cu.lastrowid
+        if self.cu.lastrowid:
             conn.commit()
             super().disconnectdb()
             return 'Review Added'
