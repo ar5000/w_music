@@ -3,11 +3,14 @@ import instrument_model
 import xml.etree.ElementTree as ET
 from dataclasses import dataclass
 
+# @dataclass
 class Datastore():
+    # db: str = "music_store"
+
     @staticmethod  
-    def connectdb():
+    def connectdb(db):
         global conn
-        conn = sqlite3.connect("music_store.db")
+        conn = sqlite3.connect(db)
         return conn.cursor()
 
     @staticmethod
@@ -29,10 +32,14 @@ class Review(Datastore):
     review: str = None
     verified: bool = False
     sentiment: int = None
+    db: str = "music_store.db"
 
     def __post_init__(self):
         pass
     
+    def to_dict(self):
+        return {'ref': self.ref, 'id': self.id, 'stars': self.stars, 'review': self.review, 'verified': self.verified, 'sentiment': self.sentiment}
+
     def verified_purchase(self):
         # self.cu = super().connectdb()
         self.cu.execute("SELECT COUNT(id) from purchase_history where ref= :ref and id= :id", {"ref": self.ref, "id": self.id})
@@ -41,7 +48,7 @@ class Review(Datastore):
         return self.verified
         
     def post_review(self):
-        self.cu = super().connectdb()
+        self.cu = super().connectdb(self.db)
         self.cu.execute("insert into reviews VALUES (?,?,?,?,?,?)", (self.ref, self.id, self.stars, self.review, self.verified_purchase(), self.sentiment))
         self.cu.lastrowid
         if self.cu.lastrowid:
@@ -53,29 +60,12 @@ class Review(Datastore):
             return 'Something messed up!'
 
     @staticmethod
-    def get_all_reviews(ref):
-        cu = Datastore.connectdb()
+    def get_all_reviews(ref,db='music_store.db'):
+        cu = Datastore.connectdb(db)
         cu.execute("SELECT * FROM reviews WHERE ref = :ref", {"ref":ref})
         reviews= [{"id":row[1], "stars":row[2], "review":row[3], "verified":row[4], "sentiment":row[5]} for row in cu.fetchall()]   
         Datastore.disconnectdb()
         return reviews
-
-'''
-   @classmethod
-    def makelist(cls): # sometimes you need a tuple
-        cls.cu = super().connectdb()
-        cls.cu.execute("SELECT * FROM instruments")
-        return cls.cu
-
-    @classmethod
-    def getall(cls): # sometimes you need some a dict
-        cls.res = [{"ref_num":row[0], "category": row[2],"name":row[1], "url":row[3]} for row in cls.makelist()]
-        super().disconnectdb()
-        return cls.res
-
-'''
-
-
 
 
 @dataclass
@@ -86,6 +76,7 @@ class Instrument(Datastore):
     image: str = None
     songsterr: str = None
     reviews: list = None
+    db: str = "music_store.db"
 
     def __post_init__(self):
         if self.ref and (self.name == None):
@@ -103,14 +94,14 @@ class Instrument(Datastore):
         return 'http://www.songsterr.com/a/wa/song?id=' + random.choice(songs)
 
     def getone(self):
-        cu = super().connectdb()
+        cu = super().connectdb(self.db)
         cu.execute("SELECT * FROM instruments WHERE ref_num= :ref", {"ref":self.ref})
         self.ref, self.name, self.cat, self.image = cu.fetchone()
         super().disconnectdb()
 
     @classmethod
     def makelist(cls): # sometimes you need a tuple
-        cls.cu = super().connectdb()
+        cls.cu = super().connectdb(cls.db)
         cls.cu.execute("SELECT * FROM instruments")
         return cls.cu
 
@@ -144,7 +135,7 @@ class Instrument(Datastore):
         except:
             return 'Please use a 6-digit ref number'
 
-        self.cu = super().connectdb()
+        self.cu = super().connectdb(db)
         self.cu.execute("INSERT INTO instruments VALUES (?,?,?,?)", self.totuple())
         added_ref_num = self.cu.lastrowid
 

@@ -36,7 +36,6 @@ def show_detail_page(ref_number):
     return render_template("detailed.html", instrument=instr.todict(), reviews= reviews, message= message)
 
 
-
 @app.route('/instruments/create', methods=["GET", "POST"])
 def create_instrument():
     if request.method == "POST":    
