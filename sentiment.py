@@ -19,7 +19,7 @@ class Sentiment:
         self.weight_count()
 
 
-    def sentence_tokenize(self):
+    def sentence_tokenize(self): # Problem- If there's only one sentance, and no period, it returns and empty list
         sentence_pattern = re.compile(r'(.*?\.)(\s|$)', re.DOTALL)
         matches = sentence_pattern.findall(self.text) 
         self.sent_list = [match[0] for match in matches]
@@ -48,8 +48,8 @@ if __name__ == '__main__':
                 This is the best guitar under 
                 $750 (the price of my Fender Strat Floyd Rose).'''
 
-    test = Sentiment(text=review)
+    test = Sentiment(text=review).weight
     # print(test.text)
     # print(test.sent_list)
     # print(test.word_list)
-    print(test.weight)
+    print(test)

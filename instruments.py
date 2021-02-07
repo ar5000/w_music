@@ -2,6 +2,7 @@ import sqlite3, requests, json, random
 import instrument_model
 import xml.etree.ElementTree as ET
 from dataclasses import dataclass
+from sentiment import Sentiment
 
 # @dataclass
 class Datastore():
@@ -35,7 +36,7 @@ class Review(Datastore):
     db: str = "music_store.db"
 
     def __post_init__(self):
-        pass
+        self.sentiment = Sentiment(text=self.review).weight
     
     def to_dict(self):
         return {'ref': self.ref, 'id': self.id, 'stars': self.stars, 'review': self.review, 'verified': self.verified, 'sentiment': self.sentiment}
