@@ -1,4 +1,4 @@
-import sqlite3, requests, json, random
+import sqlite3, requests, json, random, re
 import instrument_model
 import xml.etree.ElementTree as ET
 from dataclasses import dataclass
@@ -36,6 +36,7 @@ class Review(Datastore):
     db: str = "music_store.db"
 
     def __post_init__(self):
+        self.review = self.scrub_html()
         self.sentiment = Sentiment(text=self.review).weight
     
     def to_dict(self):
@@ -50,7 +51,7 @@ class Review(Datastore):
         
     def post_review(self):
         self.cu = super().connectdb(self.db)
-        self.cu.execute("insert into reviews VALUES (?,?,?,?,?,?)", (self.ref, self.id, self.stars, self.review, self.verified_purchase(), self.sentiment))
+        self.cu.execute("insert into reviews(ref, id, stars, review, verified, sentiment) VALUES (?,?,?,?,?,?)", (self.ref, self.id, self.stars, self.review, self.verified_purchase(), self.sentiment))
         self.cu.lastrowid
         if self.cu.lastrowid:
             conn.commit()
@@ -59,15 +60,25 @@ class Review(Datastore):
         else:
             super().disconnectdb()
             return 'Something messed up!'
+    
+    def scrub_html(self):
+        return re.sub(r'</?.*?>', '', self.review)
 
     @staticmethod
     def get_all_reviews(ref,db='music_store.db'):
         cu = Datastore.connectdb(db)
         cu.execute("SELECT * FROM reviews WHERE ref = :ref", {"ref":ref})
-        reviews= [{"id":row[1], "stars":row[2], "review":row[3], "verified":row[4], "sentiment":row[5]} for row in cu.fetchall()]   
+        reviews= [{"time":row[1],"ref":ref, "id":row[3], "stars":row[4], "review":row[5], "verified":row[6], "sentiment":row[7]} for row in cu.fetchall()]   
         Datastore.disconnectdb()
         return reviews
 
+    @staticmethod
+    def get_last_review(ref,db='music_store.db'):
+        cu = Datastore.connectdb(db)
+        cu.execute("SELECT * FROM reviews WHERE ref = :ref ORDER by review_id DESC LIMIT 1", {"ref":ref})
+        last_review = cu.fetchone()
+        Datastore.disconnectdb()
+        return last_review
 
 @dataclass
 class Instrument(Datastore):
