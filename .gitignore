@@ -3,3 +3,7 @@ __pycache__/
 .gitignore
 launch.json
 generators.py
+bin/
+lib/
+pyvenv.cfg
+share/
